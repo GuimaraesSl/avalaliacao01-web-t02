@@ -1,0 +1,87 @@
+Props Drilling ocorrem quando você precisa passar uma prop entre componentes, podendo ser necessário utilizá-los em níveis bem profundos do componente (componentes encapsulados). Isso força a passagem da prop através de muitos níveis que não necessariamente precisam desses dados.
+O contexto chega então como uma solução para esse problema, pois permite que você compartilhe dados entre  componentes sem a necessidade de passar a prop necessariamente nível a nível. Com Contexto, você fornece o dado que deseja compartilhar no nível mais superio (por exemplo, onde o dado foi criado) e consome tal informação individualmente em qualquer componente inferior, dentro da árvore de componentes que deseja perpassar tal informação, sem a necessidade de passar a prop nível a nível.
+Preceba no exemplo abaixo que a prop é criada no nível mais alto (App) mas só sera utilizada no último nível, UserDetail. Com o Prop Drilling foi necessário passar tal infomação por cada nível até chegar no último, mesmo não sendo uma informação necessária para os níveis intermediários.
+
+Exemplo: 
+
+const UserDetails = ({ user }) => {
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>Age: {user.age}</p>
+    </div>
+  );
+};
+
+const Profile = ({ user }) => {
+  return (
+    <div>
+      <UserDetails user={user} />
+    </div>
+  );
+};
+
+const Dashboard = ({ user }) => {
+  return (
+    <div>
+      <Profile user={user} />
+    </div>
+  );
+};
+
+const App = () => {
+  const user = { name: 'John Doe', age: 30 };
+
+  return (
+    <div>
+      <Dashboard user={user} />
+    </div>
+  );
+};
+
+Com Contexto tal informação pode ser omitida nos demais níveis, sendo compartilhada no nível mais superior e consumida somento no nível mais inferior:
+
+Exemplo:
+
+const UserDetails = () => {
+  // Consumindo o Contexto
+  const user = useContext(UserContext);
+
+  if (!user) {
+    return <div>No user data</div>;
+  }
+
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>Age: {user.age}</p>
+    </div>
+  );
+};
+
+const Profile = () => {
+  return (
+    <div>
+      <UserDetails />
+    </div>
+  );
+};
+
+const Dashboard = () => {
+  return (
+    <div>
+      <Profile />
+    </div>
+  );
+};
+
+const App = () => {
+  const user = { name: 'John Doe', age: 30 };
+
+  return (
+    // Fornecendo o Contexto para os componentes filhos
+    <UserContext.Provider value={user}>
+      <Dashboard />
+    </UserContext.Provider>
+  );
+};
